@@ -2,8 +2,9 @@
 *.out
 *.exe
 .vscode
-.layout
+*.layout
 *.out
 bin/*
 obj/*
 *.cbp
+*.depend
