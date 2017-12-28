@@ -2,3 +2,8 @@
 *.out
 *.exe
 .vscode
+.layout
+*.out
+bin/*
+obj/*
+*.cbp

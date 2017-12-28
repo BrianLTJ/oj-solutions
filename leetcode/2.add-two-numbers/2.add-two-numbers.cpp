@@ -51,14 +51,8 @@ public:
         	rp->val=(val1+val2+carry)%10;
     		carry=(val1+val2+carry)/10;
     		
-    		cout<< val1 << " " << val2 << " " << carry << endl;
     		l1=(l1?l1->next:l1); l2=(l2?l2->next:l2);
 		}
-//		while(carry>0){
-//			rp->next=new ListNode(carry%10);
-//        	rp=rp->next;
-//        	carry = carry/10;
-//		}
 		return result.next;
     }
 };
