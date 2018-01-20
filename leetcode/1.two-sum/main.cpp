@@ -11,5 +11,6 @@ int main(){
     for(int i=0;i<r.size();i++){
         cout<<r[i]<<endl;
     }
+
     return 0;
 }
