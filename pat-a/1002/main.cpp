@@ -22,9 +22,9 @@ Sample Output
 using namespace std;
 
 typedef struct PolyNode{
-    int n=0;
-    float nk=0.0;
-    struct PolyNode * next=NULL;
+    int n;
+    float nk;
+    struct PolyNode * next;
 } * pnode;
 
 int main()
@@ -47,6 +47,7 @@ int main()
             cin >> p[i][1]->n >> p[i][1]->nk;
         }
     }
+    /*
     //Merge
     int rk=0;
     pnode result[2];
@@ -94,6 +95,94 @@ int main()
     while(result[1]){
         cout << " " << result[1]->n << " " << fixed << setprecision(1) << result[1]->nk;
         result[1]=result[1]->next;
+    }
+    */
+
+    // Merge
+    //Traverse pointer
+    pnode pt[2];
+    pt[0] = p[0][0];
+    pt[1] = p[1][0];
+    // K of result, aka number of non-zero terms
+    int rk = 0;
+    pnode r = (pnode)malloc(sizeof(struct PolyNode));
+    r->next = NULL;
+    r->n = -1;
+    r->nk = 0.0;
+    pnode rh =r;
+    // p0, p1 not end
+    while(pt[0] && pt[1]){
+        if(pt[0]->n == pt[1]->n){
+            // p0.n == pt1.n
+            
+            // p0+p1 != 0
+            if ((pt[0]->nk + pt[1]->nk)!=0.0){
+                r->n=pt[0]->n;
+                r->nk=pt[0]->nk + pt[1]->nk;
+                r->next=(pnode)malloc(sizeof(struct PolyNode));
+                r=r->next;
+
+                //Init new rnode
+                r->next=NULL;
+                r->n = -1;
+                r->nk = 0.0;
+                rk++;
+            }
+
+            pt[0]=pt[0]->next;
+            pt[1]=pt[1]->next;
+
+        } else {
+            // p0.n != pt1.n
+            // pick bigger n
+            int i = ((pt[0]->n > pt[1]->n)?0:1);
+            r->n=pt[i]->n;
+            r->nk=pt[i]->nk;
+            r->next=(pnode)malloc(sizeof(struct PolyNode));
+            r=r->next;
+
+            //Init new rnode
+            r->next=NULL;
+            r->n = -1;
+            r->nk = 0.0;
+            rk++;
+            pt[i]=pt[i]->next;
+        }
+    }
+
+    // p0 or p1 end
+    int nePoly = (pt[0]==NULL)?1:0;
+    while(pt[nePoly]){
+        if(pt[nePoly]->nk!=0) {
+            r->n=pt[nePoly]->n;
+            r->nk=pt[nePoly]->nk;
+            r->next=(pnode)malloc(sizeof(struct PolyNode));
+            r=r->next;
+
+            //Init new rnode
+            r->next=NULL;
+            r->n = -1;
+            r->nk = 0.0;
+            rk++;
+        }
+        pt[nePoly]= pt[nePoly]->next;
+    }
+
+    /*TEST*/
+    // while(rh){
+    //     cout <<rh->n<<" " << rh->nk << " ";
+    //     rh=rh->next;
+    // }
+    // cout << endl;
+    // return 0;
+    /*END TEST*/
+
+    pnode rp = rh;
+    cout << rk;
+    while(rp){
+        // cout << " [HIT rp] " ;
+        if(rp->n>-1) cout << " " << rp->n << " " << fixed << setprecision(1) << rp->nk;
+        rp=rp->next;
     }
 
     return 0;
