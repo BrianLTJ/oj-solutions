@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdlib.h>
 #define MAXCITY 500
+#define NOTVISITED -1
 
 using namespace std;
 
@@ -63,7 +64,7 @@ int main()
         an2->next = city[city1].firstarc;
         city[city1].firstarc=an2;
     }
-
+/*
     // Fetch All Routes : C0->C1
     // Visit Queue
     int nqLen = N;
@@ -113,6 +114,24 @@ int main()
         }
 
     }
+*/
+
+    // Fetch all routes C0->C1, METHOD2
+    int curPathDepth = 0; // Path Depth
+    int curPathLength = 0; // Current Path Length
+    int maxRescTeam = 0; //Current Max Rescue Team Number
+
+    int *visitCity = new int[N]; //City Visit list ,Record PathDepth 
+    // Initialize visitCity
+    for(int i=0;i<N;i++) visitCity[i] = NOTVISITED;
+
+    // Visit Queue
+    int nqLen = N;
+    int *nqueue = new int[nqLen];
+    int nqfront=0,nqrear=0;
+
+    // Insert C0 into visit queue
+    queueInsert(nqueue, nqfront, nqrear, nqLen, C1);
 
 
 
