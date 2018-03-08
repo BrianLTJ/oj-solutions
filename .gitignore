@@ -8,3 +8,4 @@ bin/*
 obj/*
 *.cbp
 *.depend
+*.test
