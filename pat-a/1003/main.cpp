@@ -1,194 +1,91 @@
-#include <iostream>
-#include <stdlib.h>
-#define MAXCITY 500
-#define NOTVISITED -1
+#include <cstdio>
+#include <algorithm>
 
 using namespace std;
+const int MAXCITY = 500;
+const int INF = 100000000;
 
-
-typedef struct ArcNode {
-    int city, length;
-    struct ArcNode *next;
-} ArcNode;
-
-typedef struct VetexNode { // Vetex
-    int n;
-    ArcNode * firstarc;
-} VetexNode;
-
-void queueInsert(int *, int&, int&, int, int);
-int queuePop(int *,int &, int &, int);
-bool isEmpty(int *,int &, int &, int);
-int getVetexLen(VetexNode [], int, int);
-
-int main()
-{
-    // Variables
-    int N=0, M=0, C1=0, C2=0;
-    int shortPathLen = 0;
-
-    // Get Variables
-    cin >> N >> M >> C1 >> C2;
-
-    // Rescue team number
-    int * resteam = new int[N];
-    for(int i = 0;i<N;i++) {
-        cin >> resteam[i];
+int main(){
+    int N, M, C1, C2;
+    scanf("%d%d%d%d", &N, &M, &C1, &C2);
+    int weight[MAXCITY];
+    for(int i=0; i < N; i++){
+        scanf("%d", &weight[i]);
     }
-
-    // Init city nodes
-    VetexNode *city=new VetexNode[N];
-    for(int i=0;i<N;i++){
-        city[i].n=i;
-        city[i].firstarc=NULL;
+    int G[MAXCITY][MAXCITY];
+    fill(G[0],G[0]+MAXCITY*MAXCITY, INF);
+    int u, v;
+    for(int i = 0; i<M; i++){
+        scanf("%d%d", &u, &v);
+        scanf("%d", &G[u][v]);
+        G[v][u]=G[u][v];
     }
+    // 节点是否已经找到最短路径
+    bool visited[MAXCITY];
+    fill(visited, visited+MAXCITY, false);
 
-    // Load Road Map data
-    for(int i = 0;i<N;i++){
-        int city0=0,city1=0,l=0;
-        cin >> city0 >> city1 >> l;
+    // 到达该城市的最短路径中，经过节点权重之和最大的
+    int w[MAXCITY]={0};
+    fill(w, w + MAXCITY, 0);
+    w[C1]=weight[C1];
 
-        // Add curPathLen
-        shortPathLen += l;
+    // 到目前为止，到达该城市已探明的最短距离
+    int d[MAXCITY];
+    fill(d, d + MAXCITY, INF);
+    d[C1] = 0;
 
-        // Connect city0-1
-        ArcNode *an1=(ArcNode *)malloc(sizeof(ArcNode));
-        an1->city=city1;
-        an1->length=l;
-        an1->next = city[city0].firstarc;
-        city[city0].firstarc=an1;
-        // Connect city1-0
-        ArcNode *an2=(ArcNode *)malloc(sizeof(ArcNode));
-        an2->city=city0;
-        an2->length=l;
-        an2->next = city[city1].firstarc;
-        city[city1].firstarc=an2;
-    }
-/*
-    // Fetch All Routes : C0->C1
-    // Visit Queue
-    int nqLen = N;
-    int *nqueue = new int[nqLen];
-    int nqfront=0,nqrear=0;
+    // 到达城市i的最短路径数量
+    int num[MAXCITY] = {0};
+    num[C1] = 1;
 
-    bool *nvisited = new bool[N]; // Vertexes if Visited
-    for (int i=0;i<N; i++) nvisited[i]=false;
+    /// Dijkstra
+    for(int i=0; i<N; i++){
+        /// Get the nearest city
+        int c=-1, minDst = INF;
+        for(int j=0; j<N; j++){
+            if(!visited[j] && d[j] < minDst) {
+                /// Update c, minDst
+                c = j;
+                minDst = d[j];
+            }
+        }
+        /// Remaining cities don't connect
+        if(c==-1) break;
 
-    int pathNum = 0; // Current shortest paths number.
-    int curPathLen = 0, curRescTeam = 0;  // Current search: path length with weight
-    int *curPath = new int[N+1];
-    int *curPathNodeCandidate = new int[N+1]; // Current Path: number of node candidates
-    curPath[0]=0; // id of last vertex in curPath.
+        visited[c] = true;
 
-    // Insert c1 to queue
-    queueInsert(nqueue, nqfront, nqrear, nqLen, C1);
+        /// Update d[city]
+        for(int v=0; v < N; v++){
+            /// city v hasnt visited, c-v connected
+            if(!visited[v] && G[c][v] < INF){
+                if(d[c] + G[c][v] < d[v]) {
+                    /// C1-c-v is shorter
+                    /// Update d
+                    d[v] = d[c] + G[c][v];
+                    /// Update num
+                    num[v] = num[c];
+                    /// Update w
+                    w[v] = w[c] + weight[v];
+                } else if(d[c] + G[c][v] == d[v]){
+                    /// Found another short path
+                    /// Update num
+                    num[v] += num[c];
 
-
-    // Visit
-    while(nqfront!=nqrear){
-        int cityNode = queuePop(nqueue, nqfront,nqrear,nqLen);
-        nvisited[cityNode]=true;
-
-        // Update curPath curPathLen
-
-        if(cityNode!=C1) { // Not end
-
-
-
-
-            int nodeCandidate = 0; // unvisited neighbors of this node
-
-            // Add unvisited neighbors to queue
-            ArcNode *p = city[cityNode].firstarc;
-            while(p){
-                if(!nvisited[p->city]){
-                    queueInsert(nqueue,nqfront,nqrear,nqLen,p->city);
-                    nodeCandidate++;
+                    /// Try to update w
+                    if(w[c] + weight[v] > w[v]) {
+                        w[v] = weight[v] + w[c];
+                    }
                 }
+
             }
 
-            curPathNodeCandidate[curPath[0]]= nodeCandidate;
-
-        } else { // Path Reach C1
-
         }
 
-    }
-*/
+    } /// End Dijkstra
 
-    // Fetch all routes C0->C1, METHOD2
-    int curPathDepth = 0; // Path Depth
-    int curPathLength = 0; // Current Path Length
-    int maxRescTeam = 0; //Current Max Rescue Team Number
-
-    int *visitCity = new int[N]; //City Visit list ,Record PathDepth 
-    // Initialize visitCity
-    for(int i=0;i<N;i++) visitCity[i] = NOTVISITED;
-
-    // Visit Queue
-    int nqLen = N;
-    int *nqueue = new int[nqLen];
-    int nqfront=0,nqrear=0;
-
-    // Insert C0 into visit queue
-    queueInsert(nqueue, nqfront, nqrear, nqLen, C1);
+    printf("%d %d", num[C2], w[C2]);
 
 
-
-
-
-
-
-    // TEST: Display RoadMap
-    for (int i=0;i<N;i++) {
-        ArcNode *p=city[i].firstarc;
-        while(p) {
-            cout << i << " " << p->city << " " << p->length << endl;
-            p=p->next;
-        }
-    }
 
     return 0;
-}
-
-int getVetexLen(VetexNode vList[], int c1, int c2){
-    int len = -1;
-    ArcNode *p=vList[c1].firstarc;
-    while(p){
-        if(p->city == c2) {
-            len = p->length;
-            break;
-        } else {
-            p=p->next;
-        }
-    }
-    return len;
-}
-
-void queueInsert(int *q,int &qfront, int &qrear, int n , int value){
-    if((qrear+1)%n!=qfront) { // if queue not full
-        qrear = (qrear+1)%n;
-        q[qrear]=value;
-    }
-
-}
-
-int queuePop(int *q,int &qfront, int &qrear, int n){
-    int value = -1; // default error;
-    if(qrear!=qfront){ // queue is not empty
-        value = q[qfront];
-        qfront = (qfront+1)%n;
-    }
-    return value;
-}
-
-bool isEmpty(int *q,int &qfront, int &qrear, int n){
-     return (qrear==qfront);
-}
-
-void printPath(int *q) {
-    for(int i=1;i<=q[0];i++){
-        cout << " " << q[i] ;
-    }
-    cout << endl;
 }
