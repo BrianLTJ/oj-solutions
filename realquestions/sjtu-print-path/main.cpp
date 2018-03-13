@@ -86,17 +86,17 @@ bool cmpFolderNode(folderNode & f1, folderNode &f2){
 
 void printTree(layerNode * root, int level){
     if(root==NULL) return;
-    string preBlank;
-    for(int i=0;i<level;i++){
-        preBlank+=" ";
-    }
+    //string preBlank;
     // Sort same layer folders
     sort(root->folders.begin(), root->folders.end(), cmpFolderNode);
 
     //cout << "[LAYER START]"<< endl;
     for(int i=0;i<root->folders.size();i++){
+        for(int i=0;i<level;i++){
+            cout << " ";
+        }
         folderNode * f = &root->folders[i];
-        cout << preBlank << f->folderName << endl;
+        cout << /*preBlank << */f->folderName << endl;
         printTree(f->child,level+1);
     }
     //cout << "[LAYER END]" << endl;
